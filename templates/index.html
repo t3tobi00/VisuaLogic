@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCDM Group Decider (Flask+TOPSIS)</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.2/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Home Page (same as before) -->
+        <div id="homePage">
+            <h1>MCDM Group Decider (TOPSIS Demo)</h1>
+            <div>
+                <label for="userName">Your Name:</label>
+                <input type="text" id="userName" placeholder="Enter your name">
+                <button onclick="setUserName()">Set Name</button>
+            </div>
+            <p id="currentUserDisplay" style="font-weight: bold; margin-top: 5px;"></p>
+            <hr>
+            <div>
+                <h2>Create Room</h2>
+                <input type="text" id="createRoomName" placeholder="Enter room name">
+                <button onclick="createRoom()">Create Room</button>
+            </div>
+            <hr>
+            <div>
+                <h2>Join Room</h2>
+                <input type="text" id="joinRoomIdInput" placeholder="Enter room ID">
+                <button onclick="joinRoom()">Join by ID</button>
+            </div>
+            <p id="homeError" class="error hidden"></p>
+        </div>
+
+        <!-- Room Page (structure mostly same, decision display changes) -->
+        <div id="roomPage" class="hidden">
+            <div class="room-header">
+                <h2 id="roomPageTitle">Room: </h2>
+                <p class="room-info">Room ID: <span id="roomPageId" class="room-id-display"
+                        title="Click to copy Room ID" onclick="copyRoomIdToClipboard()"></span></p>
+                <div class="user-list">Current Users: <span id="roomUsersList"></span></div>
+                <button id="leaveRoomButton" onclick="leaveCurrentRoom()"
+                    style="background-color: #dc3545; float: right; margin-top: -50px;">Leave Room</button>
+            </div>
+
+            <div class="tabs">
+                <button id="myRoomTab" onclick="showTab('myRoom')">My Ideas</button>
+                <button id="publicRoomTab" onclick="showTab('publicRoom')">Group Choices & Rating</button>
+            </div>
+
+            <div class="room-layout">
+                <div class="sidebar">
+                    <h3>Find Ideas (Places, Food, etc.)</h3>
+                    <input type="text" id="searchInput" onkeyup="filterLocalItems()" placeholder="Search from list...">
+                    <ul id="searchResults" class="search-results"></ul>
+                </div>
+
+                <div class="main-content">
+                    <div id="myRoomContent">
+                        <h3>My Idea Pad (Private)</h3>
+                        <div class="custom-item-input">
+                            <input type="text" id="myCustomItemInput" placeholder="Type your own idea...">
+                            <button onclick="addCustomItemToPrivate()">Add Idea</button>
+                        </div>
+                        <div id="myRoomDropZone" class="drop-zone">Drag ideas here or add your own above</div>
+                        <ul id="myRoomItems" class="item-list"></ul>
+                    </div>
+
+                    <div id="publicRoomContent" class="hidden">
+                        <h3>Group Choices (Public & Rateable)</h3>
+                        <div id="hostAddPublicItemSection" class="custom-item-input hidden">
+                            <input type="text" id="hostCustomItemInput"
+                                placeholder="Host: Add idea directly to public...">
+                            <button onclick="addCustomItemToPublicByHost()">Add Public Idea</button>
+                        </div>
+                        <div id="publicRoomDropZone" class="drop-zone">Drag ideas here or send from 'My Ideas'</div>
+                        <ul id="publicRoomItems" class="item-list"></ul>
+                        <hr>
+                        <div id="ratingSection">
+                            <p id="ratingStatus" class="voting-status"></p>
+                            <button id="finalizeRatingsButton" onclick="finalizeRatings()">My Final Ratings are
+                                Done</button>
+                            <button id="restartRatingButton" class="hidden" onclick="restartRatingProcess()"
+                                style="background-color: #ffc107; color: black;">Restart Rating Process (Host)</button>
+
+                            <!-- Decision Display Area -->
+                            <div id="allDecisionsContainer" class="hidden"
+                                style="margin-top: 20px; display: flex; gap: 20px; flex-wrap:wrap;">
+                                <div id="scoringDecisionResult" class="final-decision"
+                                    style="flex: 1; min-width: 300px;">
+                                    <h4>Scoring Method Result</h4>
+                                    <span id="scoringDecisionText"></span>
+                                    <div id="scoringDecisionDetails" class="final-decision-details"></div>
+                                </div>
+                                <div id="topsisDecisionResult" class="final-decision"
+                                    style="flex: 1; min-width: 300px; background-color: #d4edda; border-color: #c3e6cb; color: #155724;">
+                                    <h4>TOPSIS Method Result</h4>
+                                    <span id="topsisDecisionText"></span>
+                                    <div id="topsisDecisionDetails" class="final-decision-details"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>
